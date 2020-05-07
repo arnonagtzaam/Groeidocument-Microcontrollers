@@ -1,40 +1,45 @@
-/**
- * \file
- *
- * \brief Empty user application template
- *
- */
+#define F_CPU 8E6
+#include <avr/io.h>
+#include <util/delay.h>
+#include <avr/interrupt.h>
+#include "lcd.h"
 
-/**
- * \mainpage User Application template doxygen documentation
- *
- * \par Empty user application template
- *
- * Bare minimum empty user application template
- *
- * \par Content
- *
- * -# Include the ASF header files (through asf.h)
- * -# "Insert system clock initialization code here" comment
- * -# Minimal main function that starts with a call to board_init()
- * -# "Insert application code here" comment
- *
- */
+int volatile TimerPreset = 0;
+int volatile OC = 0; // Overflow counter.
 
-/*
- * Include header files for all drivers that have been imported from
- * Atmel Software Framework (ASF).
- */
-/*
- * Support and FAQ: visit <a href="https://www.microchip.com/support/">Microchip Support</a>
- */
-#include <asf.h>
+void wait(int ms)
+{ // Wait methode
+	for (int i = 0; i < ms; i++)
+	_delay_ms(1);
+}
 
-int main (void)
+ISR(TIMER2_OVF_vect) // Wordt getriggered bij een overflow.
 {
-	/* Insert system clock initialization code here (sysclk_init()). */
+	TCNT2 = TimerPreset; // Zet terug naar standaard waarde.
+	OC++; // OverflowCounter met één ophogen.
+}
 
-	board_init();
+void timerInitialize(void) // Initialiseren van de timer.
+{
+	TCNT2 = TimerPreset; // Timer initialiseren op 0 (er is immers nog geen Overflow opgetreden).
+	TIMSK |= 1 << 6; // TIMSK Overflow Interrupt Enable (pagina 162)
+	TCCR2 = 0x07; // Counter standaard modus, uitvoeren
+	sei(); // Interrupts enablen.
+}
 
-	/* Insert application code here, after the board has been initialized. */
+int main(void)
+{
+	DDRD &= ~(1 << 7); // Pin D7 naar input zetten.
+	DDRA = 0xFF; // Output mode.
+	DDRB = 0xFF; // Output mode.
+	timerInitialize(); // Initialiseren van Timer.
+
+	while (1)
+	{
+		PORTA = TCNT2; // Counter waarde toewijzen op LED rij a.
+		PORTB = OC; // OverflowCounter waarde toewijzen op LED rij b
+		wait(10); // Korte delay van ongeveer 10 ms.
+	}
+
+	return 0;
 }
