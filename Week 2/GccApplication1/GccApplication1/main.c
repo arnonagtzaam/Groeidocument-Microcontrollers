@@ -2,10 +2,54 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
+#include "lcd.h"
 
 void opdracht1();
 void opdracht2();
 void opdracht3();
+void opdracht4();
+void opdracht5();
+
+typedef struct {
+	unsigned char data;
+	unsigned int delay ;
+} PATTERN_STRUCT;
+
+PATTERN_STRUCT pattern[] = {
+	{0b00000001, 150}, {0b00000010, 150}, {0b01000000, 150}, {0b00100000, 150},
+	{0b00000001, 150}, {0b00000010, 150},
+		
+	{0b00000100, 150}, {0b00001000, 150}, {0b00010000, 150}, {0b01000000, 150}, 
+	{0b00000100, 150}, {0b00001000, 150}, {0b00010000, 150}, {0b00100000, 150},
+		
+	{0b00000001, 150}, {0b00000010, 150}, {0b00000100, 150}, {0b00001000, 150},
+	{0b00010000, 150}, {0b00100000, 0}
+};
+
+const unsigned char
+Numbers [16] =
+{
+	// dPgfe dcba
+	0b00111111, // 0
+	0b00000110, // 1
+	0b01011011, // 2
+	0b01001111, // 3
+	0b01100110, // 4
+	0b01101101, // 5
+	0b01111101, // 6
+	0b00000111, // 7
+	0b01111111, // 8
+	0b01101111, // 9
+	0b01110111, // A
+	0b01111100, // B
+	0b00111001, // C
+	0b01011110, // D
+	0b01111001, // E
+	0b01110001, // F
+
+
+
+};
 
 void wait( int ms )
 {
@@ -84,14 +128,52 @@ void opdracht2()
 
 void opdracht3() 
 {
-	
+	while(1){
+		for (int i = 0; i < 16; i++)
+		{
+			display(i);
+			wait(1000);
+		}
+	}
 }
 
+void opdracht4()
+{
+	DDRC = 0xFF;	while (1)
+	{
+		int index = 0;
+		while( pattern[index].delay != 0 ) {
+			PORTC = pattern[index].data;
+			wait(pattern[index].delay);
+			index++;
+		}
+	}
+}
+
+void opdracht5()
+{
+	init();
+	display_text("test");
+	set_cursor(3);
+}
+
+void display(int digit){	DDRC = 0xFF;	if (digit >= 0 && digit <= 15 )
+	{
+		PORTC = Numbers[digit];
+	}
+	else 
+	{
+		PORTC = Numbers[14];
+	}}
 
 int main( void )
 {
-	//opdracht1();
-	opdracht2();
 
+	//opdracht1();
+	/*opdracht2();*/
+	//opdracht3();
+	//opdracht4();
+	opdracht5();
+	while(1);
 	return 1;
 }
