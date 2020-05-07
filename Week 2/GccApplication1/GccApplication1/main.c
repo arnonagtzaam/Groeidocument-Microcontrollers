@@ -153,7 +153,7 @@ void opdracht4()
 void opdracht5()
 {
 	init();
-	display_text("bruh");
+	display_text("test");
 	set_cursor(3);
 }
 
